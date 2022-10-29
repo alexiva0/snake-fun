@@ -5,6 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "start": "python3 -m http.server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Alex, Aarni",
