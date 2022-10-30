@@ -41,11 +41,11 @@ const checkPositionValid = (snakePosition) => {
         return false;
     }
     // head escapes horizontal span of grid
-    if ((headPosition[0] < 0 || headPosition[0] > constants.GRID_HEIGHT)) {
+    if ((headPosition[0] < 0 || headPosition[0] > constants.GRID_WIDTH)) {
         return false;
     }
     // head escapes vertical span of grid
-    if ((headPosition[1] < 0 || headPosition[1] > constants.GRID_WIDTH)) {
+    if ((headPosition[1] < 0 || headPosition[1] > constants.GRID_HEIGHT)) {
         return false;
     }
     return true;
