@@ -2,6 +2,11 @@ body {
   background-color: aquamarine;
 }
 
+body > * {
+  margin: 0;
+  padding: 0;
+}
+
 .wrapper {
   height: 100vh;
   width: 100%;
@@ -11,7 +16,24 @@ body {
 }
 
 .field {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: flex-start;
+  justify-content: start;
+  box-sizing: content-box;
+  gap: 0px 0px;
   height: 800px;
   width: 400px;
   border: solid 3px pink;
+}
+
+.cell {
+  height: 80px;
+  width: 80px;
+  border: solid 1px black;
+  box-sizing: border-box;
+}
+
+.snake {
+  background-color: chartreuse;
 }
