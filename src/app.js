@@ -1,21 +1,22 @@
-const ARROW_KEYS_MAP = {
-  up: 'ArrowUp',
-  right: 'ArrowRight',
-  down: 'ArrowDown',
-  left: 'ArrowLeft',
-};
-
-const ROWS_LENGTH = 5;
-const COLLUMNS_LENGTH = 10;
+import {
+  checkPositionValid,
+  getDirection,
+  getNewHeadPosition,
+  getNewApplePosition,
+  isAppleEaten,
+} from '/src/utils.js';
+import * as constants from './constants.js';
 
 const app = () => {
   const initialState = {
-    snakePosition: [3, 7],
-    currentDirection: 'up',
-    newDirection: null,
+    snakePosition: constants.INITIAL_SNAKE_POSITION,
+    currentDirection: constants.INITIAL_DIRECTION,
+    requestedDirection: null,
+    applePosition: getNewApplePosition(constants.INITIAL_SNAKE_POSITION),
+    gameState: "IDLE"
   };
 
-  const getCellIndexByPosition = ([x, y]) => y * ROWS_LENGTH + x;
+  const getCellIndexByPosition = ([x, y]) => y * constants.GRID_WIDTH + x;
 
   const renderField = (position) => {
     const field = document.querySelector('#game-field');
@@ -44,6 +45,34 @@ const app = () => {
       return true;
     },
   });
+
+  const move = () => {
+    const {
+      snakePosition,
+      currentDirection,
+      requestedDirection,
+      applePosition
+    } = watchedState;
+    const newDirection = getDirection(currentDirection, requestedDirection)
+    const newHeadPosition = getNewHeadPosition(snakePosition[0], newDirection)
+    const appleEaten = isAppleEaten(newHeadPosition, applePosition)
+    let newBodyPosition;
+    if (appleEaten) {
+      newBodyPosition = snakePosition
+    } else {
+      newBodyPosition = snakePosition.slice(0, -1)
+    }
+    const newSnakePosition = [newHeadPosition, ...newBodyPosition];
+    if (checkPositionValid(newSnakePosition)) {
+      if (newSnakePosition.length === constants.GRID_WIDTH * constants.GRID_HEIGHT) {
+        state.gameState = "GAME_WON"
+        return
+      }
+      state.applePosition = getNewApplePosition(snakePosition)
+    } else {
+      state.gameState = "GAME_OVER"
+    }
+  }
 
   document.addEventListener('keydown', (e) => {
     e.preventDefault();
