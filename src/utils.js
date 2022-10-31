@@ -1,4 +1,4 @@
-import constants from '/src/constants.js';
+import * as constants from '/src/constants.js';
 
 const directionMapping = {
     up: 0,

@@ -1,13 +1,13 @@
-const GRID_WIDTH = 10
-const GRID_HEIGHT = 20
+const GRID_WIDTH = 5
+const GRID_HEIGHT = 10
 const INITIAL_DIRECTION = "up"
-const INITIAL_SNAKE_POSITION = [3, 7]
+const INITIAL_SNAKE_POSITION = [[3, 7]];
 
 const ARROW_KEYS_MAP = {
-    up: 'ArrowUp',
-    right: 'ArrowRight',
-    down: 'ArrowDown',
-    left: 'ArrowLeft',
+    ArrowUp: 'up',
+    ArrowRight: 'right',
+    ArrowDown: 'down',
+    ArrowLeft: 'left',
 };
 
 export {
