@@ -51,17 +51,19 @@ const app = () => {
       snakePosition,
       currentDirection,
       requestedDirection,
-      applePosition
+      // applePosition
     } = watchedState;
     const newDirection = getDirection(currentDirection, requestedDirection)
     const newHeadPosition = getNewHeadPosition(snakePosition[0], newDirection)
-    const appleEaten = isAppleEaten(newHeadPosition, applePosition)
-    let newBodyPosition;
-    if (appleEaten) {
-      newBodyPosition = snakePosition
-    } else {
-      newBodyPosition = snakePosition.slice(0, -1)
-    }
+
+    // const appleEaten = isAppleEaten(newHeadPosition, applePosition)
+    // let newBodyPosition;
+    // if (appleEaten) {
+    //   newBodyPosition = snakePosition
+    // } else {
+    //   newBodyPosition = snakePosition.slice(0, -1)
+    // }
+    const newBodyPosition = snakePosition.slice(0, -1)
     const newSnakePosition = [newHeadPosition, ...newBodyPosition];
     if (checkPositionValid(newSnakePosition)) {
       if (newSnakePosition.length === constants.GRID_WIDTH * constants.GRID_HEIGHT) {
