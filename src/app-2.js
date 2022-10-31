@@ -39,9 +39,7 @@ const app = () => {
           break;
 
         default:
-          throw new Error(
-            `Invalid field update attempt. Trying to update ${prop}`
-          );
+          console.log(state);
       }
 
       return true;
@@ -56,6 +54,12 @@ const app = () => {
       // applePosition
     } = watchedState;
     const newDirection = getDirection(currentDirection, requestedDirection);
+
+    if (newDirection !== currentDirection) {
+      watchedState.currentDirection = newDirection;
+      watchedState.requestedDirection = null;
+    }
+
     const newHeadPosition = getNewHeadPosition(snakePosition[0], newDirection);
 
     // const appleEaten = isAppleEaten(newHeadPosition, applePosition)
@@ -86,6 +90,16 @@ const app = () => {
     const keyCode = e.code;
     const isArrowKey = Object.keys(constants.ARROW_KEYS_MAP).includes(keyCode);
 
+    if (keyCode === "Space") {
+      if (watchedState.gameState === "IDLE") {
+        watchedState.gameState = "PLAY";
+        return;
+      } else if (watchedState.gameState === "PLAY") {
+        watchedState.gameState = "IDLE";
+        return;
+      }
+    }
+
     if (!isArrowKey) {
       return;
     }
@@ -96,8 +110,10 @@ const app = () => {
 
   renderField(watchedState.snakePosition);
   setInterval(() => {
-    move();
-  }, 1000);
+    if (watchedState.gameState === "PLAY") {
+      move();
+    }
+  }, 500);
 };
 
 export default app;
