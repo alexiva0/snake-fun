@@ -8,25 +8,98 @@ import {
 import * as constants from './constants.js';
 
 const app = () => {
-  const initialState = {
-    snakePosition: constants.INITIAL_SNAKE_POSITION,
-    currentDirection: constants.INITIAL_DIRECTION,
-    requestedDirection: null,
-    applePosition: getNewApplePosition(constants.INITIAL_SNAKE_POSITION),
-    gameState: "IDLE"
-  };
+  const getInitialState = () => {
+    return {
+      snakePosition: constants.INITIAL_SNAKE_POSITION,
+      currentDirection: constants.INITIAL_DIRECTION,
+      requestedDirection: null,
+      applePosition: getNewApplePosition(constants.INITIAL_SNAKE_POSITION),
+      gameState: 'INITIAL',
+    };
+  }
+
+  const resetGame = (overrides) => {
+    const newState = getInitialState()
+    Object.keys(watchedState).forEach(
+      (key) => watchedState[key] = overrides[key] || newState[key]
+    );
+  }
 
   const getCellIndexByPosition = ([x, y]) => y * constants.GRID_WIDTH + x;
 
-  const renderField = (position) => {
+  const renderField = (snakePosition) => {
     const field = document.querySelector('#game-field');
     const cells = field.querySelectorAll('.cell');
 
-    cells.forEach((cell) => cell.classList.remove('snake'));
-    cells[getCellIndexByPosition(position)].classList.add('snake');
+    cells.forEach((cell) => {
+      cell.classList.remove('snake');
+      cell.classList.remove('snake-head');
+    });
+
+    snakePosition.forEach((snakeSegmentPosition, index) => {
+      if (index === 0) {
+        cells[getCellIndexByPosition(snakeSegmentPosition)].classList.add(
+          'snake-head'
+        );
+      }
+
+      cells[getCellIndexByPosition(snakeSegmentPosition)].classList.add(
+        'snake'
+      );
+    });
   };
 
-  const watchedState = new Proxy(initialState, {
+  const renderApple = (applePosition) => {
+    const field = document.querySelector('#game-field');
+    const cells = field.querySelectorAll('.cell');
+
+    cells.forEach((cell) => cell.classList.remove('apple'));
+    cells[getCellIndexByPosition(applePosition)].classList.add('apple')
+  };
+
+  const renderPauseMenu = () => {
+    const pauseMenu = document.querySelector('#pause-menu');
+    pauseMenu.classList.remove('hidden');
+    pauseMenu.classList.add('visible');
+  }
+
+  const renderGameOver = () => {
+    const gameOver = document.querySelector('#game-over');
+    gameOver.classList.remove('hidden');
+    gameOver.classList.add('visible');
+  }
+
+  const renderGameWon = () => {
+
+  }
+
+  const hidePopups = () => {
+    const popups = document.querySelectorAll('.popup');
+    popups.forEach((popup) => {
+      popup.classList.remove('visible')
+      popup.classList.add('hidden');
+    });
+  }
+
+  const renderGameState = (gameState) => {
+    hidePopups();
+    switch (gameState) {
+      case "INITIAL":
+        renderWelcomeMenu();
+        break;
+      case "PAUSED":
+        renderPauseMenu();
+        break;
+      case "GAME_OVER":
+        renderGameOver();
+        break;
+      case "GAME_WON":
+        renderGameWon();
+        break;
+    }
+  }
+
+  const watchedState = new Proxy(getInitialState(), {
     set(state, prop, value) {
       state[prop] = value;
 
@@ -35,11 +108,13 @@ const app = () => {
           console.log(`new position ${value}`);
           renderField(value);
           break;
-
+        case 'applePosition':
+          renderApple(value);
+          break;
+        case 'gameState':
+          renderGameState(value);
+          break;
         default:
-          throw new Error(
-            `Invalid field update attempt. Trying to update ${prop}`
-          );
       }
 
       return true;
@@ -51,38 +126,76 @@ const app = () => {
       snakePosition,
       currentDirection,
       requestedDirection,
-      // applePosition
+      applePosition
     } = watchedState;
-    const newDirection = getDirection(currentDirection, requestedDirection)
-    const newHeadPosition = getNewHeadPosition(snakePosition[0], newDirection)
+    const newDirection = getDirection(currentDirection, requestedDirection);
 
-    // const appleEaten = isAppleEaten(newHeadPosition, applePosition)
-    // let newBodyPosition;
-    // if (appleEaten) {
-    //   newBodyPosition = snakePosition
-    // } else {
-    //   newBodyPosition = snakePosition.slice(0, -1)
-    // }
-    const newBodyPosition = snakePosition.slice(0, -1)
+    if (newDirection !== currentDirection) {
+      watchedState.currentDirection = newDirection;
+      watchedState.requestedDirection = null;
+    }
+
+    const newHeadPosition = getNewHeadPosition(snakePosition[0], newDirection);
+
+    const appleEaten = isAppleEaten(newHeadPosition, applePosition)
+    let newBodyPosition;
+    if (appleEaten) {
+      watchedState.applePosition = getNewApplePosition(snakePosition)
+      newBodyPosition = snakePosition
+    } else {
+      newBodyPosition = snakePosition.slice(0, -1)
+    }
     const newSnakePosition = [newHeadPosition, ...newBodyPosition];
     if (checkPositionValid(newSnakePosition)) {
-      if (newSnakePosition.length === constants.GRID_WIDTH * constants.GRID_HEIGHT) {
-        state.gameState = "GAME_WON"
-        return
+      if (
+        newSnakePosition.length ===
+        constants.GRID_WIDTH * constants.GRID_HEIGHT
+      ) {
+        watchedState.gameState = 'GAME_WON';
+        return;
       }
-      state.applePosition = getNewApplePosition(snakePosition)
+      watchedState.snakePosition = newSnakePosition;
     } else {
-      state.gameState = "GAME_OVER"
+      watchedState.gameState = 'GAME_OVER';
     }
-  }
+  };
 
   document.addEventListener('keydown', (e) => {
-    e.preventDefault();
+    const keyCode = e.code;
+    const isArrowKey = Object.keys(constants.ARROW_KEYS_MAP).includes(keyCode);
 
-    // set new direction based on the key code
+    if (keyCode === "Space") {
+      switch (watchedState.gameState) {
+        case "INITIAL":
+          watchedState.gameState = "PLAY";
+          return;
+        case "PAUSED":
+          watchedState.gameState = "PLAY";
+          return;
+        case "PLAY":
+          watchedState.gameState = "PAUSED";
+          return;
+        case "GAME_OVER":
+          resetGame({ gameState: "PLAY" });
+          return;
+      }
+    }
+
+    if (!isArrowKey) {
+      return;
+    }
+
+    e.preventDefault();
+    watchedState.requestedDirection = constants.ARROW_KEYS_MAP[keyCode];
   });
 
-  renderField(watchedState.position);
+  renderField(watchedState.snakePosition);
+  renderApple(watchedState.applePosition);
+  setInterval(() => {
+    if (watchedState.gameState === "PLAY") {
+      move();
+    }
+  }, 500);
 };
 
 export default app;
