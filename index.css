@@ -41,3 +41,37 @@ body > * {
 .apple {
   background-color: red;
 }
+
+.hidden {
+  display: none;
+}
+
+.visible {
+  display: block;
+}
+
+.popup {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+#game-over {
+  color: black;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 100px;
+  font-weight: bold;
+  width: 320px;
+  padding: 24px 0px;
+  background-color: white;
+  border-radius: 16px;
+}
+
+#pause-menu {
+  color: white;
+  font-size: 100px;
+  font-weight: bold;
+  width: 100%;
+}

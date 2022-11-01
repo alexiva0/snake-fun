@@ -8,13 +8,22 @@ import {
 import * as constants from './constants.js';
 
 const app = () => {
-  const initialState = {
-    snakePosition: constants.INITIAL_SNAKE_POSITION,
-    currentDirection: constants.INITIAL_DIRECTION,
-    requestedDirection: null,
-    applePosition: null,
-    gameState: 'IDLE',
-  };
+  const getInitialState = () => {
+    return {
+      snakePosition: constants.INITIAL_SNAKE_POSITION,
+      currentDirection: constants.INITIAL_DIRECTION,
+      requestedDirection: null,
+      applePosition: getNewApplePosition(constants.INITIAL_SNAKE_POSITION),
+      gameState: 'INITIAL',
+    };
+  }
+
+  const resetGame = (overrides) => {
+    const newState = getInitialState()
+    Object.keys(watchedState).forEach(
+      (key) => watchedState[key] = overrides[key] || newState[key]
+    );
+  }
 
   const getCellIndexByPosition = ([x, y]) => y * constants.GRID_WIDTH + x;
 
@@ -36,7 +45,49 @@ const app = () => {
     cells[getCellIndexByPosition(applePosition)].classList.add('apple')
   };
 
-  const watchedState = new Proxy(initialState, {
+  const renderPauseMenu = () => {
+    const pauseMenu = document.querySelector('#pause-menu');
+    pauseMenu.classList.remove('hidden');
+    pauseMenu.classList.add('visible');
+  }
+
+  const renderGameOver = () => {
+    const gameOver = document.querySelector('#game-over');
+    gameOver.classList.remove('hidden');
+    gameOver.classList.add('visible');
+  }
+
+  const renderGameWon = () => {
+
+  }
+
+  const hidePopups = () => {
+    const popups = document.querySelectorAll('.popup');
+    popups.forEach((popup) => {
+      popup.classList.remove('visible')
+      popup.classList.add('hidden');
+    });
+  }
+
+  const renderGameState = (gameState) => {
+    hidePopups();
+    switch (gameState) {
+      case "INITIAL":
+        renderWelcomeMenu();
+        break;
+      case "PAUSED":
+        renderPauseMenu();
+        break;
+      case "GAME_OVER":
+        renderGameOver();
+        break;
+      case "GAME_WON":
+        renderGameWon();
+        break;
+    }
+  }
+
+  const watchedState = new Proxy(getInitialState(), {
     set(state, prop, value) {
       state[prop] = value;
 
@@ -48,8 +99,10 @@ const app = () => {
         case 'applePosition':
           renderApple(value);
           break;
+        case 'gameState':
+          renderGameState(value);
+          break;
         default:
-          console.log(state);
       }
 
       return true;
@@ -100,15 +153,19 @@ const app = () => {
     const isArrowKey = Object.keys(constants.ARROW_KEYS_MAP).includes(keyCode);
 
     if (keyCode === "Space") {
-      if (watchedState.gameState === "IDLE") {
-        if (!watchedState.applePosition) {
-          watchedState.applePosition = getNewApplePosition(constants.INITIAL_SNAKE_POSITION)
-        }
-        watchedState.gameState = "PLAY";
-        return;
-      } else if (watchedState.gameState === "PLAY") {
-        watchedState.gameState = "IDLE";
-        return;
+      switch (watchedState.gameState) {
+        case "INITIAL":
+          watchedState.gameState = "PLAY";
+          return;
+        case "PAUSED":
+          watchedState.gameState = "PLAY";
+          return;
+        case "PLAY":
+          watchedState.gameState = "PAUSED";
+          return;
+        case "GAME_OVER":
+          resetGame({gameState: "PLAY"});
+          return;
       }
     }
 
@@ -121,6 +178,7 @@ const app = () => {
   });
 
   renderField(watchedState.snakePosition);
+  renderApple(watchedState.applePosition);
   setInterval(() => {
     if (watchedState.gameState === "PLAY") {
       move();
