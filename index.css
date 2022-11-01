@@ -38,6 +38,16 @@ body > * {
   background-color: chartreuse;
 }
 
+.snake-head {
+  background-color: #37e84c;
+}
+
+.snake-head:before {
+  content: "^  ^";
+  font-size: 50px;
+  font-family: system-ui;
+}
+
 .apple {
   background-color: red;
 }
