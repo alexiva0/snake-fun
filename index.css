@@ -24,18 +24,18 @@ body > * {
   gap: 0px 0px;
   height: 800px;
   width: 400px;
-  border: solid 3px pink;
+  border: solid 5px black;
 }
 
 .cell {
   height: 80px;
   width: 80px;
-  border: solid 1px black;
   box-sizing: border-box;
 }
 
 .snake {
   background-color: chartreuse;
+  border: solid 1px black;
 }
 
 .snake-head {
@@ -66,22 +66,10 @@ body > * {
   top: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
-}
-
-#game-over {
-  color: black;
+  background-color: black;
+  color: white;
   font-family: 'Courier New', Courier, monospace;
-  font-size: 100px;
-  font-weight: bold;
+  border-radius: 16px;
   width: 320px;
   padding: 24px 0px;
-  background-color: white;
-  border-radius: 16px;
-}
-
-#pause-menu {
-  color: white;
-  font-size: 100px;
-  font-weight: bold;
-  width: 100%;
 }

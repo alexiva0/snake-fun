@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,6 +9,7 @@
   <link rel="stylesheet" href="index.css">
 </head>
 </head>
+
 <body>
   <div class="wrapper">
     <div id="game-field" class="field">
@@ -62,9 +64,19 @@
       <div class="cell"></div>
       <div class="cell"></div>
     </div>
-    <div id="pause-menu" class="popup hidden">||</div>
-    <div id="game-over" class="popup hidden">GAME OVER</div>
+    <div id="welcome" class="popup hidden">
+      <h1>WELCOME!</h1>
+      <p>Press [space bar] to play.</p>
+    </div>
+    <div id="pause" class="popup hidden"><h1>||</h1></div>
+    <div id="game-over" class="popup hidden">
+      <h1>GAME OVER</h1>
+    </div>
+    <div id="game-won" class="popup hidden">
+      <h1>GAME OVER :)</h1>
+    </div>
   </div>
   <script type="module" src="index.js"></script>
 </body>
+
 </html>

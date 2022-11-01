@@ -57,20 +57,10 @@ const app = () => {
     cells[getCellIndexByPosition(applePosition)].classList.add('apple')
   };
 
-  const renderPauseMenu = () => {
-    const pauseMenu = document.querySelector('#pause-menu');
-    pauseMenu.classList.remove('hidden');
-    pauseMenu.classList.add('visible');
-  }
-
-  const renderGameOver = () => {
-    const gameOver = document.querySelector('#game-over');
-    gameOver.classList.remove('hidden');
-    gameOver.classList.add('visible');
-  }
-
-  const renderGameWon = () => {
-
+  const renderPopup = (querySelector) => {
+    const welcomeMenu = document.querySelector(querySelector);
+    welcomeMenu.classList.remove('hidden');
+    welcomeMenu.classList.add('visible');
   }
 
   const hidePopups = () => {
@@ -85,16 +75,16 @@ const app = () => {
     hidePopups();
     switch (gameState) {
       case "INITIAL":
-        renderWelcomeMenu();
+        renderPopup("#welcome");
         break;
       case "PAUSED":
-        renderPauseMenu();
+        renderPopup("#pause");
         break;
       case "GAME_OVER":
-        renderGameOver();
+        renderPopup("#game-over");
         break;
       case "GAME_WON":
-        renderGameWon();
+        renderPopup("#game-won");
         break;
     }
   }
@@ -102,10 +92,8 @@ const app = () => {
   const watchedState = new Proxy(getInitialState(), {
     set(state, prop, value) {
       state[prop] = value;
-
       switch (prop) {
         case 'snakePosition':
-          console.log(`new position ${value}`);
           renderField(value);
           break;
         case 'applePosition':
@@ -137,16 +125,12 @@ const app = () => {
 
     const newHeadPosition = getNewHeadPosition(snakePosition[0], newDirection);
 
-    const appleEaten = isAppleEaten(newHeadPosition, applePosition)
-    let newBodyPosition;
-    if (appleEaten) {
-      watchedState.applePosition = getNewApplePosition(snakePosition)
-      newBodyPosition = snakePosition
-    } else {
-      newBodyPosition = snakePosition.slice(0, -1)
-    }
+    const appleEaten = isAppleEaten(newHeadPosition, applePosition);
+    if (appleEaten) console.log('omnom')
+    const newBodyPosition = appleEaten ? snakePosition : snakePosition.slice(0, -1);
     const newSnakePosition = [newHeadPosition, ...newBodyPosition];
     if (checkPositionValid(newSnakePosition)) {
+      watchedState.snakePosition = newSnakePosition;
       if (
         newSnakePosition.length ===
         constants.GRID_WIDTH * constants.GRID_HEIGHT
@@ -154,9 +138,11 @@ const app = () => {
         watchedState.gameState = 'GAME_WON';
         return;
       }
-      watchedState.snakePosition = newSnakePosition;
     } else {
       watchedState.gameState = 'GAME_OVER';
+    }
+    if (appleEaten) {
+      watchedState.applePosition = getNewApplePosition(newSnakePosition);
     }
   };
 
@@ -189,13 +175,14 @@ const app = () => {
     watchedState.requestedDirection = constants.ARROW_KEYS_MAP[keyCode];
   });
 
+  renderGameState(watchedState.gameState);
   renderField(watchedState.snakePosition);
   renderApple(watchedState.applePosition);
   setInterval(() => {
     if (watchedState.gameState === "PLAY") {
       move();
     }
-  }, 500);
+  }, 300);
 };
 
 export default app;
