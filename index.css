@@ -37,3 +37,7 @@ body > * {
 .snake {
   background-color: chartreuse;
 }
+
+.apple {
+  background-color: red;
+}

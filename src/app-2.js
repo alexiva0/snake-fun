@@ -12,7 +12,7 @@ const app = () => {
     snakePosition: constants.INITIAL_SNAKE_POSITION,
     currentDirection: constants.INITIAL_DIRECTION,
     requestedDirection: null,
-    applePosition: getNewApplePosition(constants.INITIAL_SNAKE_POSITION),
+    applePosition: null,
     gameState: 'IDLE',
   };
 
@@ -28,6 +28,14 @@ const app = () => {
     );
   };
 
+  const renderApple = (applePosition) => {
+    const field = document.querySelector('#game-field');
+    const cells = field.querySelectorAll('.cell');
+
+    cells.forEach((cell) => cell.classList.remove('apple'));
+    cells[getCellIndexByPosition(applePosition)].classList.add('apple')
+  };
+
   const watchedState = new Proxy(initialState, {
     set(state, prop, value) {
       state[prop] = value;
@@ -37,7 +45,9 @@ const app = () => {
           console.log(`new position ${value}`);
           renderField(value);
           break;
-
+        case 'applePosition':
+          renderApple(value);
+          break;
         default:
           console.log(state);
       }
@@ -51,7 +61,7 @@ const app = () => {
       snakePosition,
       currentDirection,
       requestedDirection,
-      // applePosition
+      applePosition
     } = watchedState;
     const newDirection = getDirection(currentDirection, requestedDirection);
 
@@ -62,14 +72,14 @@ const app = () => {
 
     const newHeadPosition = getNewHeadPosition(snakePosition[0], newDirection);
 
-    // const appleEaten = isAppleEaten(newHeadPosition, applePosition)
-    // let newBodyPosition;
-    // if (appleEaten) {
-    //   newBodyPosition = snakePosition
-    // } else {
-    //   newBodyPosition = snakePosition.slice(0, -1)
-    // }
-    const newBodyPosition = snakePosition.slice(0, -1);
+    const appleEaten = isAppleEaten(newHeadPosition, applePosition)
+    let newBodyPosition;
+    if (appleEaten) {
+      watchedState.applePosition = getNewApplePosition(snakePosition)
+      newBodyPosition = snakePosition
+    } else {
+      newBodyPosition = snakePosition.slice(0, -1)
+    }
     const newSnakePosition = [newHeadPosition, ...newBodyPosition];
     if (checkPositionValid(newSnakePosition)) {
       if (
@@ -80,7 +90,6 @@ const app = () => {
         return;
       }
       watchedState.snakePosition = newSnakePosition;
-      // state.applePosition = getNewApplePosition(snakePosition)
     } else {
       watchedState.gameState = 'GAME_OVER';
     }
@@ -92,6 +101,9 @@ const app = () => {
 
     if (keyCode === "Space") {
       if (watchedState.gameState === "IDLE") {
+        if (!watchedState.applePosition) {
+          watchedState.applePosition = getNewApplePosition(constants.INITIAL_SNAKE_POSITION)
+        }
         watchedState.gameState = "PLAY";
         return;
       } else if (watchedState.gameState === "PLAY") {
