@@ -22,13 +22,14 @@ body > * {
   justify-content: start;
   box-sizing: content-box;
   gap: 0px 0px;
-  height: 800px;
+  height: 90vh;
+  max-height: 800px;
   width: 400px;
   border: solid 5px black;
 }
 
 .cell {
-  height: 80px;
+  height: 10%;
   width: 80px;
   box-sizing: border-box;
 }
