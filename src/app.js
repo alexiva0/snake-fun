@@ -190,7 +190,7 @@ const app = () => {
     if (watchedState.gameState === "PLAY") {
       move();
     }
-  }, 300);
+  }, constants.INTERVAL_LENGTH);
 };
 
 export default app;
