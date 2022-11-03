@@ -169,6 +169,7 @@ const app = () => {
           watchedState.gameState = "PAUSED";
           return;
         case "GAME_OVER":
+        case "GAME_WON":
           resetGame({ gameState: "PLAY" });
           return;
       }
