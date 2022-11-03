@@ -12,7 +12,7 @@ const app = () => {
     return {
       snakePosition: constants.INITIAL_SNAKE_POSITION,
       currentDirection: constants.INITIAL_DIRECTION,
-      requestedDirection: null,
+      requestedDirections: [],
       applePosition: getNewApplePosition(constants.INITIAL_SNAKE_POSITION),
       gameState: 'INITIAL',
     };
@@ -113,14 +113,13 @@ const app = () => {
     const {
       snakePosition,
       currentDirection,
-      requestedDirection,
+      requestedDirections,
       applePosition
     } = watchedState;
-    const newDirection = getDirection(currentDirection, requestedDirection);
-
+    const newDirection = requestedDirections[0] || currentDirection;
     if (newDirection !== currentDirection) {
       watchedState.currentDirection = newDirection;
-      watchedState.requestedDirection = null;
+      watchedState.requestedDirections.shift();
     }
 
     const newHeadPosition = getNewHeadPosition(snakePosition[0], newDirection);
@@ -151,8 +150,16 @@ const app = () => {
     const isArrowKey = Object.keys(constants.ARROW_KEYS_MAP).includes(keyCode);
 
     if (isArrowKey) {
-      e.preventDefault();
-      watchedState.requestedDirection = constants.ARROW_KEYS_MAP[keyCode];
+      const requestedDirection = constants.ARROW_KEYS_MAP[keyCode]
+      const directionList = [
+        watchedState.currentDirection,
+        ...watchedState.requestedDirections
+      ]
+      const newDirection = getDirection(directionList.at(-1), requestedDirection);
+      if (directionList.at(-1) !== newDirection) {
+        e.preventDefault();
+        watchedState.requestedDirections.push(constants.ARROW_KEYS_MAP[keyCode]);
+      }
       return;
     }
 
