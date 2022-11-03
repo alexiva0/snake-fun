@@ -150,7 +150,14 @@ const app = () => {
     const keyCode = e.code;
     const isArrowKey = Object.keys(constants.ARROW_KEYS_MAP).includes(keyCode);
 
+    if (isArrowKey) {
+      e.preventDefault();
+      watchedState.requestedDirection = constants.ARROW_KEYS_MAP[keyCode];
+      return;
+    }
+
     if (keyCode === "Space") {
+      e.preventDefault();
       switch (watchedState.gameState) {
         case "INITIAL":
           watchedState.gameState = "PLAY";
@@ -166,13 +173,6 @@ const app = () => {
           return;
       }
     }
-
-    if (!isArrowKey) {
-      return;
-    }
-
-    e.preventDefault();
-    watchedState.requestedDirection = constants.ARROW_KEYS_MAP[keyCode];
   });
 
   renderGameState(watchedState.gameState);
