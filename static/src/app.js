@@ -4,8 +4,9 @@ import {
   getNewHeadPosition,
   getNewApplePosition,
   isAppleEaten,
-} from '/src/utils.js';
+} from './utils.js';
 import * as constants from './constants.js';
+import { getHighScore, setHighScore } from './api.js'
 
 const app = () => {
   const getInitialState = () => {
@@ -15,8 +16,12 @@ const app = () => {
       requestedDirections: [],
       applePosition: getNewApplePosition(constants.INITIAL_SNAKE_POSITION),
       gameState: 'INITIAL',
+      score: 0,
+      highScore: null,
     };
   }
+
+  getHighScore().then((highScore) => watchedState.highScore = highScore);
 
   const resetGame = (overrides) => {
     const newState = getInitialState()
@@ -63,6 +68,16 @@ const app = () => {
     welcomeMenu.classList.add('visible');
   }
 
+  const renderHighScore = (highScore) => {
+    const span = document.querySelector("#high-score");
+    span.innerHTML = highScore;
+  }
+
+  const renderScore = (score) => {
+    const span = document.querySelector("#score");
+    span.innerHTML = score;
+  }
+
   const hidePopups = () => {
     const popups = document.querySelectorAll('.popup');
     popups.forEach((popup) => {
@@ -102,12 +117,25 @@ const app = () => {
         case 'gameState':
           renderGameState(value);
           break;
+        case 'highScore':
+          renderHighScore(value);
+          break;
+        case 'score':
+          renderScore(value);
+          break;
         default:
       }
 
       return true;
     },
   });
+
+  const updateHighScore = () => {
+    if (watchedState.score > watchedState.highScore) {
+      setHighScore(watchedState.score)
+        .then((highScore) => watchedState.highScore = highScore)
+    }
+  }
 
   const move = () => {
     const {
@@ -125,7 +153,6 @@ const app = () => {
     const newHeadPosition = getNewHeadPosition(snakePosition[0], newDirection);
 
     const appleEaten = isAppleEaten(newHeadPosition, applePosition);
-    if (appleEaten) console.log('omnom')
     const newBodyPosition = appleEaten ? snakePosition : snakePosition.slice(0, -1);
     const newSnakePosition = [newHeadPosition, ...newBodyPosition];
     if (checkPositionValid(newSnakePosition)) {
@@ -134,14 +161,17 @@ const app = () => {
         newSnakePosition.length ===
         constants.GRID_WIDTH * constants.GRID_HEIGHT
       ) {
+        updateHighScore();
         watchedState.gameState = 'GAME_WON';
         return;
       }
     } else {
+      updateHighScore();
       watchedState.gameState = 'GAME_OVER';
     }
     if (appleEaten) {
       watchedState.applePosition = getNewApplePosition(newSnakePosition);
+      watchedState.score += 1;
     }
   };
 
@@ -177,7 +207,7 @@ const app = () => {
           return;
         case "GAME_OVER":
         case "GAME_WON":
-          resetGame({ gameState: "PLAY" });
+          resetGame({ gameState: "PLAY", highScore: watchedState.highScore });
           return;
       }
     }
@@ -186,6 +216,7 @@ const app = () => {
   renderGameState(watchedState.gameState);
   renderField(watchedState.snakePosition);
   renderApple(watchedState.applePosition);
+  renderScore(watchedState.score)
   setInterval(() => {
     if (watchedState.gameState === "PLAY") {
       move();
